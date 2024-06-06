@@ -187,6 +187,8 @@ if __name__ == '__main__':
     args = parse_args()
     output = args.output
     runs = args.runs
+    print("args",args)  # args Namespace(scenario='isolated', runs=3, output=True)
+    # print('output',output,"runs",runs)  # output True runs 3
 
     if args.scenario == 'isolated':
         isolated_obj_scenario(runs, vis=True, output=output, debug=False)

@@ -9,6 +9,9 @@ def get_device(force_cpu):
     if torch.cuda.is_available() and not force_cpu:
         logging.info("CUDA detected. Running with GPU acceleration.")
         device = torch.device("cuda")
+    elif torch.backends.mps.is_available() and not force_cpu:
+        logging.info("use mac m cilicon. Running with GPU acceleration.")
+        device = torch.device("mps")
     elif force_cpu:
         logging.info("CUDA detected, but overriding with option '--cpu'. Running with only CPU.")
         device = torch.device("cpu")
