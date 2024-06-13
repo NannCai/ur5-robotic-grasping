@@ -7,6 +7,8 @@ import argparse
 import os
 import sys
 sys.path.append('network')
+import matplotlib.pyplot as plt
+import datetime
 
 
 def parse_args():
@@ -23,6 +25,27 @@ def parse_args():
     return args
 
 
+def show_images(rgb, depth, seg, save_path=None):
+    fig, axes = plt.subplots(1, 3, figsize=(15, 5))
+    
+    axes[0].imshow(rgb)
+    axes[0].set_title('RGB Image')
+    axes[0].axis('off')
+    
+    axes[1].imshow(depth, cmap='gray')
+    axes[1].set_title('Depth Image')
+    axes[1].axis('off')
+    
+    axes[2].imshow(seg)
+    axes[2].set_title('Segmentation Image')
+    axes[2].axis('off')
+    
+
+    if save_path:
+        plt.savefig(save_path)
+    else:
+        plt.show()
+
 def isolated_obj_scenario(n, vis, output, debug):
 
     objects = YcbObjects('objects/ycb_objects',
@@ -37,6 +60,15 @@ def isolated_obj_scenario(n, vis, output, debug):
     generator = GraspGenerator(network_path, camera, 5)
 
     objects.shuffle_objects()
+
+
+    # cam_img_save_dir = 'cam_output/'
+    current_time = datetime.datetime.now().strftime("%Y-%m-%d_%H-%M-%S")
+    cam_img_save_dir = os.path.join('cam_output', current_time)
+    os.makedirs(cam_img_save_dir, exist_ok=True)
+    counter = 0
+
+
     for _ in range(n):
         for obj_name in objects.obj_names:
             print(obj_name)
@@ -44,19 +76,39 @@ def isolated_obj_scenario(n, vis, output, debug):
             path, mod_orn, mod_stiffness = objects.get_obj_info(obj_name)
             env.load_isolated_obj(path, mod_orn, mod_stiffness)
             env.move_away_arm()
+            print('11111111111--------')
+            rgb, depth, seg = camera.get_cam_img()
+            # Save the image with a counter
+            image_path = os.path.join(cam_img_save_dir, f'image_{counter}.png')
+            show_images(rgb, depth, seg, save_path=image_path)
+            counter += 1
 
-            rgb, depth, _ = camera.get_cam_img()
+            for _ in range(10):
+                camera.move_camera((0.1, 0, 0))  # Move the camera 1 unit along the x-axis
+                rgb, depth, seg = camera.get_cam_img()
+                
+                # Save the image with a counter
+                image_path = os.path.join(cam_img_save_dir, f'image_{counter}.png')
+                print('image_path',image_path)
+                show_images(rgb, depth, seg, save_path=image_path)
+                counter += 1
+            
+            # print('record the gif figure')
+            camera.start_recording('/Users/cainan/Desktop/active_perception/simulation/ur5-robotic-grasping/video_output')
             grasps, save_name = generator.predict_grasp(
                 rgb, depth, n_grasps=3, show_output=output)
+
             for i, grasp in enumerate(grasps):
                 x, y, z, roll, opening_len, obj_height = grasp
                 if vis:
                     debug_id = p.addUserDebugLine(
                         [x, y, z], [x, y, 1.2], [0, 0, 1], lineWidth=3)
+                    print('debug_id',debug_id)
 
                 succes_grasp, succes_target = env.grasp(
                     (x, y, z), roll, opening_len, obj_height)
                 if vis:
+                    print('p.removeUserDebugItem(debug_id)')
                     p.removeUserDebugItem(debug_id)
                 if succes_target:
                     if save_name is not None:
@@ -64,6 +116,8 @@ def isolated_obj_scenario(n, vis, output, debug):
                                   f'_SUCCESS_grasp{i}.png')
                     break
                 env.reset_all_obj()
+            camera.stop_recording()
+            print('stop recording------')
             env.remove_all_obj()
 
 

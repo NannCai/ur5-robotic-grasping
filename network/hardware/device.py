@@ -6,6 +6,8 @@ logging.basicConfig(level=logging.INFO)
 
 def get_device(force_cpu):
     # Check if CUDA can be used
+    print('torch.backends.mps.is_available()',torch.backends.mps.is_available())
+    print('force_cpu',force_cpu)
     if torch.cuda.is_available() and not force_cpu:
         logging.info("CUDA detected. Running with GPU acceleration.")
         device = torch.device("cuda")

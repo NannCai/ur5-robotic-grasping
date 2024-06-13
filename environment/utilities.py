@@ -199,11 +199,24 @@ class Camera:
                                                    )
         return rgb[:, :, 0:3], depth, seg
 
+    def move_camera(self, translation):
+        """
+        Method to move the camera by a translation vector
+        :param translation: tuple (dx, dy, dz)
+        """
+        self.x += translation[0]
+        self.y += translation[1]
+        self.z += translation[2]
+        new_cam_pos = [self.x, self.y, self.z]
+        self.view_matrix = p.computeViewMatrix(new_cam_pos, [self.x_t, self.y_t, self.z_t], [0, 1, 0])
+
+
     def start_recording(self, save_dir):
         if not os.path.exists(save_dir):
             os.mkdir(save_dir)
         now = datetime.now().strftime('%Y-%m-%d_%H-%M-%S')
         file = f'{save_dir}/{now}.mp4'
+        print('save file',file)
 
         p.configureDebugVisualizer(p.COV_ENABLE_GUI, 0)
         self.rec_id = p.startStateLogging(p.STATE_LOGGING_VIDEO_MP4, file)

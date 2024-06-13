@@ -133,3 +133,6 @@ dmypy.json
 
 /network_output
 /results
+
+video_output/
+cam_output/
