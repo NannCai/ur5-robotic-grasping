@@ -42,11 +42,8 @@ def show_images(rgb, depth, seg, save_path=None):
     
 
     if save_path:
-        print('save_path',save_path)
         plt.savefig(save_path)
-        plt.close()
     else:
-        print('show')
         plt.show()
 
 def isolated_obj_scenario(n, vis, output, debug):
@@ -78,7 +75,7 @@ def isolated_obj_scenario(n, vis, output, debug):
 
             path, mod_orn, mod_stiffness = objects.get_obj_info(obj_name)
             env.load_isolated_obj(path, mod_orn, mod_stiffness)
-            env.move_away_arm()
+            # env.move_away_arm()
             print('11111111111--------')
             rgb, depth, seg = camera.get_cam_img()
             # Save the image with a counter
@@ -86,9 +83,8 @@ def isolated_obj_scenario(n, vis, output, debug):
             show_images(rgb, depth, seg, save_path=image_path)
             counter += 1
 
-            for i in range(20):
-                direction = 0.05 if i / 5 <1 or i/15>=1 else -0.05  # Alternate direction
-                camera.move_camera((direction, 0, 0))
+            for _ in range(20):
+                camera.move_camera((0.1, 0, 0))  # Move the camera 1 unit along the x-axis
                 rgb, depth, seg = camera.get_cam_img()
                 
                 # Save the image with a counter
@@ -98,7 +94,7 @@ def isolated_obj_scenario(n, vis, output, debug):
                 counter += 1
             
             # print('record the gif figure')
-            # camera.start_recording('/Users/cainan/Desktop/active_perception/simulation/ur5-robotic-grasping/video_output')
+            camera.start_recording('/Users/cainan/Desktop/active_perception/simulation/ur5-robotic-grasping/video_output')
             # grasps, save_name = generator.predict_grasp(
             #     rgb, depth, n_grasps=3, show_output=output)
 
@@ -120,8 +116,8 @@ def isolated_obj_scenario(n, vis, output, debug):
             #                       f'_SUCCESS_grasp{i}.png')
             #         break
             #     env.reset_all_obj()
-            # camera.stop_recording()
-            # print('stop recording------')
+            camera.stop_recording()
+            print('stop recording------')
             env.remove_all_obj()
 
 

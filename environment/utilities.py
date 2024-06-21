@@ -208,7 +208,14 @@ class Camera:
         self.y += translation[1]
         self.z += translation[2]
         new_cam_pos = [self.x, self.y, self.z]
-        self.view_matrix = p.computeViewMatrix(new_cam_pos, [self.x_t, self.y_t, self.z_t], [0, 1, 0])
+        print('new_cam_pos',new_cam_pos)
+
+        self.x_t += translation[0]
+        self.y_t += translation[1]
+        self.z_t += translation[2]
+        new_cam_target = [self.x_t, self.y_t, self.z_t]
+        print('new_cam_target',new_cam_target)
+        self.view_matrix = p.computeViewMatrix(new_cam_pos, new_cam_target, [0, 1, 0])
 
 
     def start_recording(self, save_dir):
